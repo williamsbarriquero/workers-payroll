@@ -2,6 +2,7 @@ package br.com.wwwgomes.hrpayroll.service;
 
 import br.com.wwwgomes.hrpayroll.entities.Payment;
 import br.com.wwwgomes.hrpayroll.entities.Worker;
+import br.com.wwwgomes.hrpayroll.feignclients.WorkerFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -12,21 +13,17 @@ import java.util.HashMap;
 @Service
 public class PaymentService {
 
-    @Value(value = "${hr-worker.host}")
-    private String workerHost;
-
-    private final RestTemplate restTemplate;
+    private final WorkerFeignClient workerFeignClient;
 
     @Autowired
-    public PaymentService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    public PaymentService(WorkerFeignClient workerFeignClient) {
+        this.workerFeignClient = workerFeignClient;
     }
 
     public Payment getPayment(Long workerId, Integer days) {
-        var uriVariables = new HashMap<String, String>();
-        uriVariables.put("id", String.valueOf(workerId));
 
-        var worker = restTemplate.getForObject(workerHost + "/workers/{id}", Worker.class, uriVariables);
+        var worker = workerFeignClient.findById(workerId).getBody();
+
         assert worker != null;
         return new Payment(worker.getName(), worker.getDailyIncome(), days);
     }
