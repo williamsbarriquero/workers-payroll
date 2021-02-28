@@ -5,6 +5,7 @@ import br.com.wwwgomes.hrworker.repositories.WorkerRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,7 +19,10 @@ import java.util.List;
 @RequestMapping(value = "/workers")
 public class WorkerResource {
 
-    private static Logger logger = LoggerFactory.getLogger(WorkerResource.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkerResource.class);
+
+    @Value("${test.config}")
+    private String testConfig;
 
     private final Environment environment;
     private final WorkerRepository workerRepository;
@@ -37,10 +41,17 @@ public class WorkerResource {
 
     @GetMapping("/{id}")
     public ResponseEntity<Worker> findById(@PathVariable Long id) {
-        logger.info("PORT = " + environment.getProperty("local.server.port"));
+        LOGGER.info("PORT = " + environment.getProperty("local.server.port"));
 
         return workerRepository.findById(id).
                 map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
 
+    }
+
+    @GetMapping(value = "/configs")
+    public ResponseEntity<Void> getConfigs() {
+        LOGGER.info(String.format("CONFIG %s", testConfig));
+
+        return ResponseEntity.noContent().build();
     }
 }
