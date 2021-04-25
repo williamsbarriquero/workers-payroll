@@ -4,6 +4,7 @@ import br.com.wwwgomes.hroauth.entities.User;
 import br.com.wwwgomes.hroauth.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,10 +22,10 @@ public class UserResource {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<User> findByEmail(@RequestParam String email) {
+    public ResponseEntity<UserDetails> findByEmail(@RequestParam String email) {
 
         try {
-            User user = userService.findByEmail(email);
+            UserDetails user = userService.loadUserByUsername(email);
             return ResponseEntity.ok(user);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
